@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Itens - JSON/ZIP</title>
+    <style>
+        /* CÓDIGO INTEIRO FEITO COM IA */
+
+        :root {
+            --bg-color: #f5f5f5;
+            --card-bg: white;
+            --text-color: #333;
+            --primary-color: #1976d2;
+            --primary-light: #e3f2fd;
+            --border-color: #ddd;
+            --hover-color: #f0f0f0;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --scrollbar-track-color: #f1f1f1;
+            --scrollbar-thumb-color: #888;
+            --scrollbar-thumb-hover-color: #555;
+            --select-border-color: #ccc;
+            --select-background-color: #f9f9f9;
+            --select-text-color: #333;
+            --select-option-background-color: #fff;
+            --select-option-text-color: #333;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #249cff;
+            --primary-light: #1e3a5f;
+            --border-color: #333;
+            --hover-color: #2d2d2d;
+            --shadow: 0 2px 4px rgba(0,0,0,0.3);
+            --scrollbar-track-color: #333;
+            --scrollbar-thumb-color: #666;
+            --scrollbar-thumb-hover-color: #999;
+            --select-border-color: #666;
+            --select-background-color: #1e1e1e;
+            --select-text-color: #eee;
+            --select-option-background-color: #333;
+            --select-option-text-color: #eee;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color)
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 10%; /* 10% de padding apenas nas laterais */
+            box-sizing: border-box; /* Largura total inclui padding */
+        }
+
+        .filters {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            width: 200h
+        }
+
+        .filter-section {
+            display: flex; /* Alinha os elementos horizontalmente */
+            align-items: center; /* Centraliza verticalmente */
+            margin-bottom: 15px;
+            padding: 5px; /* Adiciona padding à seção de filtros */
+        }
+
+        .filter-title {
+            font-weight: bold;
+            margin-right: 10px; /* Espaçamento entre o título e os elementos */
+            color: #1976d2;
+        }
+
+        .filter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-tag {
+            background: var(--primary-light);
+            color: var(--text-color);
+            padding: 4px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .filter-tag:hover {
+            background: #1894fa;
+        }
+
+        .filter-tag.active {
+            background: #1976d2;
+            color: white;
+        }
+
+        .filter-mode-toggle {
+            background: var(--primary-color);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #1976d2;
+            font-weight: bold;
+            transition: all 0.2s;
+            white-space: nowrap; /* Evita quebra de linha */
+            margin-left: auto; /* Posiciona o botão no final */
+        }
+
+        .filter-mode-toggle.and-mode {
+            background: #1976d2;
+            color: white;
+        }
+
+        .search-box {
+            flex: 1; /* Ocupa o espaço disponível */
+            width: 90%; /* Largura total da barra de pesquisa */
+            padding: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--border-color);
+            border-radius: 4px;
+            margin-right: 10px; /* Espaçamento entre a barra de pesquisa e o botão */
+            box-sizing: border-box; /* Largura inclui padding e borda */
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex; /* Alinhar elementos horizontalmente */
+            align-items: center; /* Centralizar verticalmente */
+            gap: 10px; /* Espaçamento entre elementos */
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #1976d2;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .upload-btn:hover {
+            background: #1565c0;
+        }
+
+        #fileSelect {
+            margin-top: 10px;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            display: none;
+            flex: 1; /* Ocupa espaço disponível */
+        }
+
+        .item-list {
+            flex: 2; /* Ocupa 40% da largura */
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 40%; /* Largura correspondente a 40% */
+            box-sizing: border-box;
+        }
+
+        .details-panel {
+            flex: 3; /* Ocupa 60% da largura */
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 60%; /* Largura correspondente a 60% */
+            box-sizing: border-box;
+        }
+
+        .item {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: calc(100% - 20px);
+            box-sizing: border-box;
+        }
+
+
+        .item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .item.active {
+            background-color: var(--primary-light);
+            border-left: 4px solid #1976d2;
+        }
+
+        .details-panel h2 {
+            color: #1976d2;
+            margin-top: 0;
+        }
+
+        .details-content {
+            margin-top: 20px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: var(--primary-light);
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 0.9em;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-color);
+        }
+
+        /* Estilos para a barra de rolagem */
+        ::-webkit-scrollbar {
+            width: 10px; /* Largura da barra de rolagem */
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track-color); /* Cor de fundo da barra de rolagem */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb-color); /* Cor do "polegar" da barra de rolagem */
+            border-radius: 5px; /* Raio do "polegar" da barra de rolagem */
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-thumb-hover-color); /* Cor do "polegar" da barra de rolagem ao passar o mouse */
+        }
+
+        /* Estilos para a barra do seletor de JSON */
+        #fileSelect {
+            /* Outros estilos */
+            border: 1px solid var(--select-border-color); /* Cor da borda */
+            background-color: var(--select-background-color); /* Cor de fundo */
+            color: var(--select-text-color); /* Cor do texto */
+        }
+
+        #fileSelect option {
+            background-color: var(--select-option-background-color); /* Cor de fundo das opções */
+            color: var(--select-option-text-color); /* Cor do texto das opções */
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+        <svg class="sun" viewBox="0 0 24 24">
+            <path d="M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3zm0-2V3c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1zm0 14v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1zm7-7h4c.55 0 1 .45 1 1s-.45 1-1 1h-4c-.55 0-1-.45-1-1s.45-1 1-1zM3 12h4c.55 0 1 .45 1 1s-.45 1-1 1H3c-.55 0-1-.45-1-1s.45-1 1-1z"/>
+        </svg>
+    </button>
+    <div class="controls">
+        <label class="upload-btn" for="fileInput">Carregar arquivo ZIP</label>
+        <input type="file" id="fileInput" class="file-input" accept=".zip">
+        <select id="fileSelect"></select>
+    </div>
+
+    <div class="filters" id="filterSection">
+        <input type="text" class="search-box" id="searchBox" placeholder="Buscar por nome...">
+        <button id="filterModeToggle" class="filter-mode-toggle">Modo: OR</button>
+        <div class="filter-section">
+            <div class="filter-title">Filtros</div>
+            <div class="filter-tags" id="filterTags"></div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="item-list">
+            <h2>Lista de Itens</h2>
+            <div id="itemsList"></div>
+        </div>
+        <div class="details-panel">
+            <h2>Detalhes do Item</h2>
+            <div id="detailsContent" class="details-content">
+                Selecione um item para ver os detalhes
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script>
+        // Initialize global variables
+        let isDarkMode = false;
+        let isAndMode = false;
+        let currentItems = [];
+        let currentType = '';
+        const activeTags = new Set();
+
+        // Add event listeners when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+            document.getElementById('searchBox').addEventListener('input', filterAndRenderItems);
+            document.getElementById('filterModeToggle').addEventListener('click', toggleFilterMode);
+
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                isDarkMode = savedTheme === 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        });
+
+        function determineJsonType(json) {
+            if (json.powers) return 'powers';
+            if (json.conditions) return 'conditions';
+            if (json.items) return 'items';
+            if (json.modifications) return 'modifications';
+            if (json.origins) return 'origins';
+            if (json.ageFeel) return 'ageFeel';
+            if (json.rituals) return 'rituals';
+            if (json.subclasses) return 'subclasses';
+            if (json.mutations) return 'mutations';
+            return 'unknown';
+        }
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+            
+            // Salvar preferência no localStorage
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            
+            // Atualizar ícone
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.innerHTML = isDarkMode 
+                ? '<svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>'
+                : '<svg viewBox="0 0 24 24"><path d="M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3zm0-2V3c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1zm0 14v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1zm7-7h4c.55 0 1 .45 1 1s-.45 1-1 1h-4c-.55 0-1-.45-1-1s.45-1 1-1zM3 12h4c.55 0 1 .45 1 1s-.45 1-1 1H3c-.55 0-1-.45-1-1s.45-1 1-1z"/></svg>';
+        }
+
+        function createBasicInfo(data) {
+            let info = '';
+            if (data.source || data.page) {
+                info += `<p><strong>Fonte:</strong> ${data.source || 'N/A'}`;
+                if (data.page) info += ` (Página ${data.page})`;
+                info += '</p>';
+            }
+            if (data.entries) {
+                const entries = Array.isArray(data.entries) ? data.entries.join('<br>') : data.entries;
+                info += `<p><strong>Descrição:</strong> ${entries}</p>`;
+            }
+            return info;
+        }
+
+        function showDetails(data, type) {
+            const detailsContent = document.getElementById('detailsContent');
+            let content = `<h3>${data.name || 'Sem nome'}</h3>`;
+
+            document.querySelectorAll('.item').forEach(el => el.classList.remove('active'));
+            document.querySelector(`[data-id="${data.name}"]`)?.classList.add('active');
+
+            switch (type) {
+                case 'rituals':
+                    content += createBasicInfo(data);
+
+                    ['element', 'circle', 'execution', 'range', 'target', 'area', 'duration', 'resistence'].forEach(prop => {
+                        if (data[prop] && Array.isArray(data[prop])) {
+                            content += `<p><strong>${traduzirPropriedade(prop)}:</strong> ${data[prop].join(', ')}</p>`;
+                        } else if (data[prop]) {
+                            content += `<p><strong>${traduzirPropriedade(prop)}:</strong> ${data[prop]}</p>`;
+                        }
+                    });
+
+                    if (data.discente) {
+                        content += `<p><strong>Discente:</strong> ${data.discente.join('<br>')}</p>`;
+                    }
+                    if (data.true) {
+                        content += `<p><strong>Verdadeiro:</strong> ${data.true.join('<br>')}</p>`;
+                    }
+                    break;
+
+                case 'subclasses': // Lógica para subclasses DENTRO do switch principal
+                    content += createBasicInfo(data);
+
+                    for (const level in data) {
+                        const levelNumber = parseInt(level);
+                        if (!isNaN(levelNumber)) {
+                            const levelData = data[level];
+                            content += `<h4>NEX ${level}%</h4>`;
+
+                            for (const prop in levelData) {
+                                content += `<p><strong>${traduzirPropriedade(prop)}:</strong> ${levelData[prop]}</p>`;
+                            }
+                        }
+                    }
+
+                default: // Caso para lidar com os itens (armas, etc.)
+                    content += createBasicInfo(data); // Exibe informações básicas (source, page, entries)
+
+                    // Itera sobre as propriedades do item e as exibe
+                    for (const prop in data) {
+                        if (prop !== 'name' && prop !== 'source' && prop !== 'page' && prop !== 'entries') { // Ignora propriedades já exibidas
+                            let value = data[prop];
+
+                            // Formata arrays para exibição
+                            if (Array.isArray(value)) {
+                                value = value.join(', ');
+                            }
+
+                            content += `<p><strong>${traduzirPropriedade(prop)}:</strong> ${value}</p>`;
+                        }
+                    }
+                break; // Importante: o break para subclasses
+            } // Fim do switch principal
+
+            detailsContent.innerHTML = content;
+        }
+
+        function traduzirPropriedade(prop) {
+            switch (prop) {
+                case 'element': return 'Elemento';
+                case 'range': return 'Alcance';
+                case 'target': return 'Alvo';
+                case 'area': return 'Área';
+                case 'duration': return 'Duração';
+                case 'circle': return 'Círculo';
+                case 'execution': return 'Execução';
+                case 'resistence': return 'Resistência';
+                case 'true': return 'Verdadeiro';
+                case 'name': return 'Poder';
+                case 'power': return 'Descrição';
+                case 'itemType': return 'Proficiência';
+                case 'weaponType': return 'Estilo';
+                case 'weaponWeight': return 'Empunhadura';
+                case 'category': return 'Categoria'
+                case 'damage': return 'Dano';
+                case 'defense': return 'Defesa';
+                case 'critical': return 'Crítico';
+                case 'damageType': return 'Tipo';
+                case 'slots': return 'Espaços';
+                case 'class': return 'Classe';
+                case 'type': return 'Classe';
+                case 'prerequisite': return 'Pré-requisito'
+                case 'afinidade': return 'Afinidade'
+
+                default: return prop;   
+            }
+        }
+        
+        function extractTags(items) {
+            const tags = new Set();
+            items.forEach(item => {
+                const itemTags = [
+                    ...(Array.isArray(item.type) ? item.type : [item.type]),
+                    ...(Array.isArray(item.element) ? item.element : [item.element]),
+                    ...(Array.isArray(item.skills) ? item.skills : [item.skills]),
+                    ...(Array.isArray(item.weaponType) ? item.weaponType : [item.weaponType]),
+                    ...(Array.isArray(item.weaponWeight) ? item.weaponWeight : [item.weaponWeight]),
+                    ...(Array.isArray(item.category) ? item.category : [item.category]),
+                    ...(Array.isArray(item.damageType) ? item.damageType : [item.damageType]),
+                    item.class,
+                    item.circle,
+                    item.itemType,
+                    item.weaponType,
+                    item.damageType
+                ].filter(tag => tag && typeof tag === 'string');
+
+                itemTags.forEach(tag => tags.add(tag));
+            });
+            return Array.from(tags).sort();
+        }
+
+        function renderFilterTags(tags) {
+            const filterTags = document.getElementById('filterTags');
+            filterTags.innerHTML = tags.map(tag => 
+                `<div class="filter-tag ${activeTags.has(tag) ? 'active' : ''}" 
+                      onclick="toggleFilter('${tag}')">${tag}</div>`
+            ).join('');
+        }
+
+        function toggleFilter(tag) {
+            if (activeTags.has(tag)) {
+                activeTags.delete(tag);
+            } else {
+                activeTags.add(tag);
+            }
+            filterAndRenderItems();
+            renderFilterTags(extractTags(currentItems));
+        }
+
+        function toggleFilterMode() {
+            isAndMode = !isAndMode;
+            const button = document.getElementById('filterModeToggle');
+            button.textContent = `Modo: ${isAndMode ? 'AND' : 'OR'}`;
+            button.classList.toggle('and-mode', isAndMode);
+            filterAndRenderItems();
+        }
+
+        function filterItems(items, searchText, tags) {
+            return items.filter(item => {
+                const nameMatch = item.name && item.name.toLowerCase().includes(searchText.toLowerCase());
+                
+                if (tags.size === 0) return nameMatch;
+
+                const itemTags = [
+                    ...(Array.isArray(item.type) ? item.type : [item.type]),
+                    ...(Array.isArray(item.element) ? item.element : [item.element]),
+                    ...(Array.isArray(item.skills) ? item.skills : [item.skills]),
+                    ...(Array.isArray(item.weaponType) ? item.weaponType : [item.weaponType]),
+                    ...(Array.isArray(item.weaponWeight) ? item.weaponWeight : [item.weaponWeight]),
+                    ...(Array.isArray(item.category) ? item.category : [item.category]),
+                    ...(Array.isArray(item.damageType) ? item.damageType : [item.damageType]),
+                    item.class,
+                    item.circle,
+                    item.itemType,
+                    item.weaponType,
+                    item.damageType
+                ].filter(tag => tag && typeof tag === 'string');
+
+                const tagMatch = isAndMode
+                    ? Array.from(tags).every(tag => itemTags.includes(tag))
+                    : Array.from(tags).some(tag => itemTags.includes(tag));
+                
+                return nameMatch && tagMatch;
+            });
+        }
+
+        function filterAndRenderItems() {
+            const searchText = document.getElementById('searchBox').value;
+            const filteredItems = filterItems(currentItems, searchText, activeTags);
+            renderItems(filteredItems, currentType);
+        }
+
+        function renderItems(items, type) {
+            const itemsList = document.getElementById('itemsList');
+            itemsList.innerHTML = items.map(item => `
+                <div class="item" data-id="${item.name}" onclick='showDetails(${JSON.stringify(item).replace(/'/g, "&#39;")}, "${type}")'>
+                    <strong>${item.name || 'Sem nome'}</strong>
+                    ${renderItemTags(item)} </div>
+            `).join('');
+
+            if (items.length > 0) {
+                showDetails(items[0], type);
+            }
+        }
+
+        function renderItemTags(item) {
+            const tags = [
+                ...(Array.isArray(item.type) ? item.type : [item.type]),
+                ...(Array.isArray(item.element) ? item.element : [item.element]),
+                ...(Array.isArray(item.skills) ? item.skills : [item.skills]),
+                ...(Array.isArray(item.weaponType) ? item.weaponType : [item.weaponType]),
+                ...(Array.isArray(item.weaponWeight) ? item.weaponWeight : [item.weaponWeight]),
+                ...(Array.isArray(item.category) ? item.category : [item.category]),
+                ...(Array.isArray(item.damageType) ? item.damageType : [item.damageType]),
+                item.class,
+                item.circle,
+                item.itemType,
+                item.weaponType,
+                item.damageType
+            ].filter(tag => tag && typeof tag === 'string');
+
+            return tags.map(tag => `<span class="tag">${tag}</span>`).join(' ');
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const zip = new JSZip();
+                zip.loadAsync(e.target.result).then(function(zip) {
+                    const fileSelect = document.getElementById('fileSelect');
+                    fileSelect.innerHTML = '';
+                    fileSelect.style.display = 'block';
+
+                    const jsonFiles = Object.keys(zip.files).filter(filename => filename.endsWith('.json'));
+
+                    jsonFiles.forEach(filename => {
+                        const option = document.createElement('option');
+                        option.value = filename;
+                        option.text = filename;
+                        fileSelect.appendChild(option);
+                    });
+
+                    if (jsonFiles.length > 0) {
+                        displayJsonFromZip(zip, jsonFiles[0]);
+                    }
+
+                    fileSelect.addEventListener('change', function() {
+                        displayJsonFromZip(zip, fileSelect.value);
+                    });
+                }).catch(function(e) {
+                    console.error("Erro ao carregar arquivo ZIP:", e);
+                    alert("Erro ao carregar arquivo ZIP: " + e);
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function displayJsonFromZip(zip, filename) {
+            zip.files[filename].async("string").then(function(content) {
+                try {
+                    const json = JSON.parse(content);
+                    const type = determineJsonType(json);
+                    let items = [];
+
+                    if (type !== 'unknown' && json[type]) {
+                        items = json[type]; // Obtém o array de itens
+                    } else if (Array.isArray(json)) {
+                        items = json;
+                    } else if (typeof json === 'object') {
+                        items = [json];
+                    }
+
+                    currentItems = items;
+                    currentType = type;
+
+                    activeTags.clear();
+                    document.getElementById('searchBox').value = '';
+
+                    const tags = extractTags(items); // Extrai as tags dos itens
+                    renderFilterTags(tags); // Renderiza as tags nos filtros
+                    renderItems(items, type); // Renderiza os itens na lista
+
+                } catch (error) {
+                    console.error("Erro ao processar JSON:", error);
+                    alert('Erro ao processar arquivo JSON: ' + error.message);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
